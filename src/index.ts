@@ -23,7 +23,7 @@ export abstract class TGKeyboard {
     public readonly keyboardId: KeyboardId,
     public readonly bot: TelegramBot,
     public readonly ls: LocalStorage,
-    public readonly message?: string,
+    public readonly message?: string
   ) {
     // Create variable for storing message IDs
     this.keyboardMessageId = new Variable<number>("keyboardMessageId" + keyboardId, 0, this.ls);
@@ -44,18 +44,22 @@ export abstract class TGKeyboard {
    */
   public sendKeyboard(chat_id: ChatID, message?: string, parse_mode: TelegramBot.ParseMode = "HTML"): void {
     this.removeKeyboard(chat_id);
-    this.bot.sendMessage(
-      chat_id,
-      // The message can not be empty
-      message || this.message || "Keyboard",
-      {
-        parse_mode,
-        reply_markup: {
-          inline_keyboard: this.keyboard(chat_id),
+    this.bot
+      .sendMessage(
+        chat_id,
+        // The message can not be empty
+        message || this.message || "Keyboard",
+        {
+          parse_mode,
+          reply_markup: {
+            inline_keyboard: this.keyboard(chat_id),
+          },
         }
-      }
-    ).then(m => this.keyboardMessageId.set(m.message_id.toString(), chat_id))
-    .catch(_ => {});
+      )
+      .then(m => this.keyboardMessageId.set(m.message_id.toString(), chat_id))
+      .catch(() => {
+        return;
+      });
   }
 
   /**
