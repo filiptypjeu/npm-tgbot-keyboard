@@ -63,12 +63,16 @@ export abstract class TGKeyboard {
   }
 
   /**
-   * Remove the previous keyboard.
+   * Remove the previous keyboard, by either removing the whole message or changing it to a message without a keyboard.
    */
-  public removeKeyboard(chat_id: ChatID): void {
+  public removeKeyboard(chat_id: ChatID, text?: string, parse_mode: TelegramBot.ParseMode = "HTML"): void {
     const message_id = this.keyboardMessageId.get(chat_id);
     if (message_id) {
-      this.bot.deleteMessage(chat_id, message_id.toString());
+      if (text) {
+        this.bot.editMessageText(text, { chat_id, message_id, parse_mode });
+      } else {
+        this.bot.deleteMessage(chat_id, message_id.toString());
+      }
     }
     this.keyboardMessageId.reset(chat_id);
   }
