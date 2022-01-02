@@ -80,10 +80,10 @@ export abstract class TGKeyboard {
   /**
    * Edit the previous keyboard.
    */
-  public editKeyboard(chat_id: ChatID): void {
+  public editKeyboard(chat_id: ChatID, new_keyboard?: TelegramBot.InlineKeyboardButton[][]): void {
     const message_id = this.keyboardMessageId.get(chat_id);
     if (message_id) {
-      this.bot.editMessageReplyMarkup({ inline_keyboard: this.keyboard(chat_id) }, { chat_id, message_id });
+      this.bot.editMessageReplyMarkup({ inline_keyboard: new_keyboard || this.keyboard(chat_id) }, { chat_id, message_id });
     }
   }
 
