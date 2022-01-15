@@ -90,8 +90,8 @@ export abstract class TGKeyboard {
   /**
    * Create callback data for this keyboard.
    */
-  protected ccd(data: string): string {
-    return this.keyboardId + ":" + data;
+  protected ccd(data: string | number | (string | number)[], joinWith: string = ":"): string {
+    return this.keyboardId + ":" + (Array.isArray(data) ? data.map(s => s.toString()).join(joinWith) : data.toString());
   }
 
   /**
@@ -101,6 +101,8 @@ export abstract class TGKeyboard {
 
   /**
    * Handle the callback from this keyboard.
+   *
+   * @returns the query answer that should be sent to the user.
    */
   protected abstract handleCallback(callbackData: string, q: TelegramBot.CallbackQuery): string;
 }
