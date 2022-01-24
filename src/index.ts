@@ -3,18 +3,15 @@ import { LocalStorage } from "node-localstorage";
 import TelegramBot from "node-telegram-bot-api";
 import { ChatID, Variable } from "tgbot-helpers";
 
-type KeyboardId = string;
-// type CallbackId = string;
-// type CallbackAttribute = string;
-// type CallbackValue = string;
-// type CallbackData = `${KeyboardId}:${string}`;
+export type KeyboardId = string;
+export type CallbackDataSignature = string | number | (string | number)[];
 
-// interface ICallbackData<K extends string, V> {
-//   keyboardId: KeyboardId;
-//   callbackId: CallbackId;
-//   attribute?: K;
-//   data?: V;
-// }
+/**
+ * Create callback data.
+ */
+const ccd = (data: CallbackDataSignature, keyboardId?: KeyboardId, joinWith: string = ":"): string => {
+  return (keyboardId ? keyboardId + joinWith : "") + (Array.isArray(data) ? data.map(s => s.toString()).join(joinWith) : data.toString());
+}
 
 export abstract class TGKeyboard {
   public readonly keyboardMessageId: Variable<number>;
@@ -23,8 +20,16 @@ export abstract class TGKeyboard {
     public readonly keyboardId: KeyboardId,
     public readonly bot: TelegramBot,
     public readonly ls: LocalStorage,
-    public readonly message?: string
+    public readonly message?: string,
+    public readonly joinCallbackDataWith: string = ":"
   ) {
+    if (this.keyboardId.includes(joinCallbackDataWith)) {
+      throw new Error("Keyboard ID can not include the callback data joiner");
+    }
+    if (!this.keyboardId) {
+      throw new Error("Keyboard ID can not be an empty string");
+    }
+
     // Create variable for storing message IDs
     this.keyboardMessageId = new Variable<number>("keyboardMessageId" + keyboardId, 0, this.ls);
 
@@ -90,8 +95,8 @@ export abstract class TGKeyboard {
   /**
    * Create callback data for this keyboard.
    */
-  protected ccd(data: string | number | (string | number)[], joinWith: string = ":"): string {
-    return this.keyboardId + ":" + (Array.isArray(data) ? data.map(s => s.toString()).join(joinWith) : data.toString());
+  protected ccd(data: CallbackDataSignature): string {
+    return ccd(data, this.keyboardId, this.joinCallbackDataWith);
   }
 
   /**
