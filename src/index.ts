@@ -12,7 +12,7 @@ export type CallbackDataMapping<T> = (element: T, row: number, column: number) =
  */
 const ccd = (data: CallbackDataSignature, keyboardId?: KeyboardId, joinWith: string = ":"): string => {
   return (keyboardId ? keyboardId + joinWith : "") + (Array.isArray(data) ? data.map(s => s.toString()).join(joinWith) : data.toString());
-}
+};
 
 export abstract class TGKeyboard {
   public readonly keyboardMessageId: Variable<number>;
@@ -142,7 +142,7 @@ export class TGKeyboardBuilder {
   }
 
   public addButtons<T>(list: T[], mapping: CallbackDataMapping<T>): TGKeyboardBuilder {
-    let column = this.currentRow.length;
+    const column = this.currentRow.length;
     const row = this.keyboard.length - 1;
     list.forEach((e, i) => this.addButton(mapping(e, row, column + i)));
     return this;
