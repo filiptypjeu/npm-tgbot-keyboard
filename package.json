@@ -13,16 +13,15 @@
         "prepare": "npm run build",
         "prepublishOnly": "npm test && npm run lint",
         "preversion": "npm run format && npm run lint",
-        "start": "node dist/index.js",
         "test": "",
         "test-coverage": "",
         "version": "npm run format && git add -A src"
     },
     "repository": {
         "type": "git",
-        "url": "git@github.com:filiptypjeu/npm-tgobot-keyboard.git"
+        "url": "git@github.com:filiptypjeu/npm-tgbot-keyboard.git"
     },
-    "homepage": "https://github.com/filiptypjeu/npm-tgobot-keyboard",
+    "homepage": "https://github.com/filiptypjeu/npm-tgbot-keyboard",
     "author": "Filip Stenbacka",
     "license": "ISC",
     "types": "dist/index.d.ts",
