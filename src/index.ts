@@ -5,6 +5,7 @@ import { ChatID, Variable } from "tgbot-helpers";
 
 export type KeyboardId = string;
 export type CallbackDataSignature = string | number | (string | number)[];
+export type CallbackDataMapping<T> = (element: T, row: number, column: number) => TelegramBot.KeyboardButton;
 
 /**
  * Create callback data.
@@ -110,4 +111,55 @@ export abstract class TGKeyboard {
    * @returns the query answer that should be sent to the user.
    */
   protected abstract handleCallback(callbackData: string, q: TelegramBot.CallbackQuery): string;
+}
+
+export class TGKeyboardBuilder {
+  private keyboard: TelegramBot.InlineKeyboardButton[][] = [];
+
+  constructor(private readonly keyboardId?: KeyboardId, private readonly joinCallbackDataWith: string = ":") {}
+
+  private get currentRow(): TelegramBot.KeyboardButton[] {
+    const i = this.keyboard.length - 1;
+    if (i < 0) {
+      throw new Error("There are no rows added to the keyboard.");
+    }
+    return this.keyboard[i];
+  }
+
+  public ccd(data?: CallbackDataSignature): string | undefined {
+    return data ? ccd(data, this.keyboardId, this.joinCallbackDataWith) : undefined;
+  }
+
+  public build(): TelegramBot.InlineKeyboardButton[][] {
+    return this.keyboard;
+  }
+
+  public addButton(button: TelegramBot.InlineKeyboardButton): TGKeyboardBuilder;
+  public addButton(text: string, callback_data?: CallbackDataSignature): TGKeyboardBuilder;
+  public addButton(text: TelegramBot.InlineKeyboardButton | string, callback_data?: CallbackDataSignature): TGKeyboardBuilder {
+    this.currentRow.push(typeof text === "string" ? { text, callback_data: this.ccd(callback_data) } : text);
+    return this;
+  }
+
+  public addButtons<T>(list: T[], mapping: CallbackDataMapping<T>): TGKeyboardBuilder {
+    let column = this.currentRow.length;
+    const row = this.keyboard.length - 1;
+    list.forEach((e, i) => this.addButton(mapping(e, row, column + i)));
+    return this;
+  }
+
+  public addRow<T>(list: T[], mapping: CallbackDataMapping<T>): TGKeyboardBuilder;
+  public addRow(): TGKeyboardBuilder;
+  public addRow<T>(list?: T[], mapping?: CallbackDataMapping<T>): TGKeyboardBuilder {
+    this.keyboard.push([]);
+    if (list && mapping) {
+      this.addButtons(list, mapping);
+    }
+    return this;
+  }
+
+  public addRows<T>(list: T[][], mapping: CallbackDataMapping<T>): TGKeyboardBuilder {
+    list.forEach(l => this.addRow(l, mapping));
+    return this;
+  }
 }
