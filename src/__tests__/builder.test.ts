@@ -74,7 +74,7 @@ test("builder add row with buttons", () => {
 test("builder add rows with buttons", () => {
   const b = new TGKeyboardBuilder("MYID", "/");
 
-  b.addRows([["a", "b"], ["c"], ["d"]], (text: string, row: number, column: number) => ({
+  b.addRows([["a", undefined, "b"], [undefined, "c", undefined], ["d"]], (text: string, row: number, column: number) => ({
     text,
     callback_data: b.ccd([text, row, column]),
   }));

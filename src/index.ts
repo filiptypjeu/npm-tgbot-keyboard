@@ -141,16 +141,21 @@ export class TGKeyboardBuilder {
     return this;
   }
 
-  public addButtons<T>(list: T[], mapping: CallbackDataMapping<T>): TGKeyboardBuilder {
-    const column = this.currentRow.length;
+  public addButtons<T>(list: (T | undefined)[], mapping: CallbackDataMapping<T>): TGKeyboardBuilder {
+    let column = this.currentRow.length;
     const row = this.keyboard.length - 1;
-    list.forEach((e, i) => this.addButton(mapping(e, row, column + i)));
+    list.forEach(e => {
+      if (e !== undefined) {
+        this.addButton(mapping(e, row, column));
+        column++;
+      }
+    });
     return this;
   }
 
-  public addRow<T>(list: T[], mapping: CallbackDataMapping<T>): TGKeyboardBuilder;
+  public addRow<T>(list: (T | undefined)[], mapping: CallbackDataMapping<T>): TGKeyboardBuilder;
   public addRow(): TGKeyboardBuilder;
-  public addRow<T>(list?: T[], mapping?: CallbackDataMapping<T>): TGKeyboardBuilder {
+  public addRow<T>(list?: (T | undefined)[], mapping?: CallbackDataMapping<T>): TGKeyboardBuilder {
     this.keyboard.push([]);
     if (list && mapping) {
       this.addButtons(list, mapping);
@@ -158,7 +163,7 @@ export class TGKeyboardBuilder {
     return this;
   }
 
-  public addRows<T>(list: T[][], mapping: CallbackDataMapping<T>): TGKeyboardBuilder {
+  public addRows<T>(list: (T | undefined)[][], mapping: CallbackDataMapping<T>): TGKeyboardBuilder {
     list.forEach(l => this.addRow(l, mapping));
     return this;
   }
