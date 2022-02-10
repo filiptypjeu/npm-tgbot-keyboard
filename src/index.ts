@@ -88,12 +88,9 @@ export abstract class TGKeyboard {
    */
   public editKeyboard(chat_id: ChatID, new_keyboard?: TelegramBot.InlineKeyboardButton[][], text?: string, parse_mode: TelegramBot.ParseMode = "HTML"): void {
     const message_id = this.keyboardMessageId.get(chat_id);
-    if (message_id) {
-      if (text) {
-        this.bot.editMessageText(text, { chat_id, message_id, parse_mode });
-      }
-      this.bot.editMessageReplyMarkup({ inline_keyboard: new_keyboard || this.keyboard(chat_id) }, { chat_id, message_id });
-    }
+    if (!message_id) return;
+
+    (text ? this.bot.editMessageText(text, { chat_id, message_id, parse_mode }) : Promise.resolve()).then(() => this.bot.editMessageReplyMarkup({ inline_keyboard: new_keyboard || this.keyboard(chat_id) }, { chat_id, message_id }));
   }
 
   /**
