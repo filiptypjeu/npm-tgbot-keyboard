@@ -1,11 +1,10 @@
-// import { LocalStorage } from "node-localstorage";
-import { LocalStorage } from "node-localstorage";
 import TelegramBot from "node-telegram-bot-api";
-import { ChatID, Variable } from "tgbot-helpers";
+import { ILocalStorage, Variable } from "persistance";
 
 export type KeyboardId = string;
 export type CallbackDataSignature = string | number | (string | number)[];
 export type CallbackDataMapping<T> = (element: T, row: number, column: number) => TelegramBot.KeyboardButton;
+type ChatId = TelegramBot.ChatId;
 
 /**
  * Create callback data.
@@ -20,7 +19,7 @@ export abstract class TGKeyboard {
   constructor(
     public readonly keyboardId: KeyboardId,
     public readonly bot: TelegramBot,
-    public readonly ls: LocalStorage,
+    public readonly ls: ILocalStorage,
     public readonly message?: string,
     public readonly joinCallbackDataWith: string = ":"
   ) {
@@ -48,7 +47,7 @@ export abstract class TGKeyboard {
   /**
    * Send a new keyboard.
    */
-  public sendKeyboard(chat_id: ChatID, message?: string, parse_mode: TelegramBot.ParseMode = "HTML"): void {
+  public sendKeyboard(chat_id: ChatId, message?: string, parse_mode: TelegramBot.ParseMode = "HTML"): void {
     this.removeKeyboard(chat_id);
     this.bot
       .sendMessage(
@@ -62,7 +61,7 @@ export abstract class TGKeyboard {
           },
         }
       )
-      .then(m => this.keyboardMessageId.set(m.message_id.toString(), chat_id))
+      .then(m => this.keyboardMessageId.set(m.message_id, chat_id))
       .catch(() => {
         return;
       });
@@ -71,7 +70,7 @@ export abstract class TGKeyboard {
   /**
    * Remove the previous keyboard, by either removing the whole message or changing it to a message without a keyboard.
    */
-  public removeKeyboard(chat_id: ChatID, text?: string, parse_mode: TelegramBot.ParseMode = "HTML"): void {
+  public removeKeyboard(chat_id: ChatId, text?: string, parse_mode: TelegramBot.ParseMode = "HTML"): void {
     const message_id = this.keyboardMessageId.get(chat_id);
     if (message_id) {
       if (text) {
@@ -80,14 +79,14 @@ export abstract class TGKeyboard {
         this.bot.deleteMessage(chat_id, message_id.toString());
       }
     }
-    this.keyboardMessageId.reset(chat_id);
+    this.keyboardMessageId.clear(chat_id);
   }
 
   /**
    * Edit the previous keyboard.
    */
   public editKeyboard(
-    chat_id: ChatID,
+    chat_id: ChatId,
     new_keyboard?: TelegramBot.InlineKeyboardButton[][],
     text?: string,
     parse_mode: TelegramBot.ParseMode = "HTML"
@@ -110,7 +109,7 @@ export abstract class TGKeyboard {
   /**
    * Create a keyboard.
    */
-  public abstract keyboard(chat_id: ChatID): TelegramBot.InlineKeyboardButton[][];
+  public abstract keyboard(chat_id: ChatId): TelegramBot.InlineKeyboardButton[][];
 
   /**
    * Handle the callback from this keyboard.
